@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang=" pt-br">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -124,7 +124,7 @@
 
   <div id="section-pagamento" class="content-section">
     <div style="background: #eff6ff; padding: 15px; border-radius: 14px; margin-bottom: 20px; color: #1e40af; font-size: 13px; line-height: 1.4;">
-      💎 <b>Taxa Única: R$ 5,00</b>. Acesso vitalício liberado após envio do comprovante.
+      💎 <b>Plano Mensal: R$ 3,00 / mês</b>. Acesso liberado após envio do comprovante.
     </div>
     
     <button class="btn btn-pix" onclick="gerarPix()">⚡ Gerar QR Code Pix</button>
@@ -146,7 +146,6 @@
   <div id="feedback" class="msg"></div>
 </div>
 
-<!-- Firebase SDK Atualizado (v12.11.0) -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -165,15 +164,12 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Registro do SW para PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     });
   }
 
-  // LÓGICA DE LOGIN/CADASTRO
-  // LÓGICA DE LOGIN/CADASTRO
   document.getElementById('btnLogin').onclick = async () => {
     const email = document.getElementById('email').value.trim();
     const senha = document.getElementById('senha').value;
@@ -202,7 +198,6 @@
       const userDoc = await getDoc(doc(db, "usuarios", userRes.user.uid));
       
       if (userDoc.exists() && userDoc.data().aprovado === true) {
-        // Redirecionamento corrigido para index.html
         window.location.href = "index.html"; 
       } else {
         fb.textContent = "✅ Conta pronta! Agora realize o pagamento para liberar.";
@@ -217,10 +212,9 @@
       btn.disabled = false; btn.textContent = "Acessar Sistema";
     }
   };
-  
 
-  // INTERFACE E PIX
-  const PIX_STRING = "00020126360014BR.GOV.BCB.PIX0114+551999679685152040000530398654045.005802BR5901N6001C62070503***63049D51";
+  // Payload Pix ajustado com o valor de R$ 3,00 (54043.00)
+  const PIX_STRING = "00020126360014BR.GOV.BCB.PIX0114+55199967968515204000030398654043.005802BR5901N6001C62070503***63049D51";
 
   window.switchTab = (tab) => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -250,7 +244,7 @@
 
   window.enviarZap = () => {
     const nome = document.getElementById('nome-usuario').value;
-    const msg = encodeURIComponent(`Olá! Fiz o pagamento de R$ 5,00. Nome: ${nome}. Aguardo liberação.`);
+    const msg = encodeURIComponent(`Olá! Fiz o pagamento de R$ 3,00 (Plano Mensal)[cite: 1]. Nome: ${nome}. Aguardo liberação.`);
     window.open(`https://wa.me/5519996796851?text=${msg}`, '_blank');
   };
 </script>

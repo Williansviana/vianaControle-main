@@ -1,7 +1,8 @@
-const CACHE_NAME = 'viana-v4';
+const CACHE_NAME = 'viana-v5';
 const ASSETS = [
   './login.html',
   './index.html',
+  './pagamento.html',
   './manifest.json',
   './img/logo_oficial.png',
 ];

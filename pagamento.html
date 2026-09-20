@@ -34,7 +34,7 @@
     <p style="font-size: 14px; color: #555;">Siga os passos abaixo para liberar seu sistema.</p>
 
     <div class="step">
-        <strong>1. Pagamento de R$ 5,00</strong>
+        <strong>1. Plano Mensal: R$ 3,00 / mês</strong>[cite: 1]
         <button class="btn btn-pix" onclick="gerarPix()">💎 Gerar QR Code Pix</button>
         <div id="qrcode"></div>
         <div id="pix-display" style="display:none">
@@ -54,7 +54,7 @@
 </div>
 
 <script>
-    const PIX_CODE = "00020126360014BR.GOV.BCB.PIX0114+551999679685152040000530398654045.005802BR5901N6001C62070503***63049D51";
+    const PIX_CODE = "00020126360014BR.GOV.BCB.PIX0114+55199967968515204000030398654043.005802BR5901N6001C62070503***63049D51";
 
     function gerarPix() {
         const qrDiv = document.getElementById('qrcode');
@@ -77,7 +77,7 @@
 
     function enviarZap() {
         const nome = document.getElementById('nome-usuario').value;
-        const msg = encodeURIComponent(`Olá! Sou ${nome}. Fiz o Pix de R$5 e quero liberar meu acesso ao Viana Controle.`);
+        const msg = encodeURIComponent(`Olá! Sou ${nome}. Fiz o Pix de R$ 3,00 (Plano Mensal)[cite: 1] e quero liberar meu acesso ao Viana Controle[cite: 1].`);
         window.open(`https://wa.me/5519996796851?text=${msg}`, '_blank');
     }
 </script>

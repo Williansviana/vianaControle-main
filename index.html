@@ -29,7 +29,6 @@
     .month-nav button { width: 40px; height: 40px; border: none; background: var(--bg); border-radius: 10px; cursor: pointer; color: var(--text); font-size: 18px; }
     #month-label { font-weight: 700; text-transform: capitalize; font-size: 15px; }
 
-    /* Salário Card */
     .salario-card {
       background: var(--card); padding: 12px 16px; border-radius: 14px;
       border: 1px solid var(--border); box-shadow: var(--shadow); margin-top: 12px;
@@ -38,13 +37,11 @@
     .salario-card label { margin-bottom: 0; white-space: nowrap; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
     .salario-card input { width: 160px; padding: 8px; font-weight: 700; text-align: right; }
 
-    /* Resumo Grid */
     .resumo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0 12px 0; }
     .resumo-item { background: var(--card); padding: 12px 8px; border-radius: 12px; border: 1px solid var(--border); text-align: center; box-shadow: var(--shadow); }
     .resumo-item label { display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
     .resumo-item span { font-size: 13px; font-weight: 700; display: block; }
 
-    /* Barra de Progresso */
     .progress-container {
       background: var(--card); padding: 12px 16px; border-radius: 14px;
       border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 20px;
@@ -60,25 +57,19 @@
       text-align: center;
     }
     input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-    
-    input[type="date"] {
-      display: flex; align-items: center; justify-content: center; min-height: 48px; -webkit-appearance: none; appearance: none;
-    }
+    input[type="date"] { display: flex; align-items: center; justify-content: center; min-height: 48px; -webkit-appearance: none; appearance: none; }
 
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    
     .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--primary); color: white; font-weight: 700; cursor: pointer; font-size: 15px; transition: all 0.2s ease; margin-top: 5px; }
     .btn:active { transform: scale(0.96); opacity: 0.9; }
     .btn-loading { background: var(--muted); pointer-events: none; }
     .btn-cancel { background: var(--muted); margin-top: 5px; }
 
     .lista-container { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
-    
     .item { 
       display: flex; justify-content: space-between; align-items: center; 
       padding: 16px; border-bottom: 1px solid var(--border); transition: 0.3s;
     }
-    
     .item.status-paga { border-left: 6px solid var(--paga); background: rgba(16, 185, 129, 0.04); }
     .item.status-paga .name { color: var(--muted); text-decoration: line-through; }
     .item.status-vencida { border-left: 6px solid var(--vencida); background: rgba(239, 68, 68, 0.04); }
@@ -91,10 +82,8 @@
     .btn-action { width: 34px; height: 34px; border: none; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
     .btn-action:hover { background: var(--border); }
     .btn-sair { background: transparent; color: var(--muted); border: none; margin-top: 20px; width: 100%; font-size: 13px; text-decoration: underline; cursor: pointer; }
-    
     .field-group { text-align: center; }
 
-    /* Modal de Edição */
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100;
@@ -114,14 +103,12 @@
       <button id="next">→</button>
     </div>
 
-    <!-- Campo do Salário com Máscara de Moeda (Ponto e Vírgula) -->
     <div class="salario-card">
       <label>💵 Salário Mês (R$)</label>
       <input type="text" id="input-salario" placeholder="0,00" inputmode="numeric" />
     </div>
   </header>
 
-  <!-- Cards de Resumo Financeiro -->
   <div class="resumo-grid">
     <div class="resumo-item" style="border-bottom: 3px solid var(--info);">
       <label>Total Mês</label>
@@ -141,7 +128,6 @@
     </div>
   </div>
 
-  <!-- Barra de Progresso visual -->
   <div class="progress-container">
     <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">
       <span>Comprometimento do Salário</span>
@@ -174,7 +160,6 @@
   <button id="sair" class="btn btn-sair">Sair do Sistema</button>
 </div>
 
-<!-- Modal Edição -->
 <div class="modal-overlay" id="edit-modal">
   <div class="modal-content">
     <h3 style="margin-bottom: 15px; text-align: center;">Editar Conta</h3>
@@ -216,7 +201,6 @@
 
   const formatarMoeda = (v) => Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  // Converte string formatada "1.250,50" para o número 1250.50
   const parseMoeda = (valorTexto) => {
     if (!valorTexto) return 0;
     const numLimpo = valorTexto.replace(/\./g, '').replace(',', '.');
@@ -238,7 +222,7 @@
     const snap = await getDoc(salarioRef);
     const inputSalario = document.getElementById('input-salario');
 
-    if (snap.exists() && snap.data().valor) {
+    if (snap.exists() && snap.data().valor !== undefined) {
       salarioAtual = snap.data().valor;
       inputSalario.value = formatarMoeda(salarioAtual);
     } else {
@@ -248,7 +232,6 @@
     render();
   }
 
-  // Máscara monetária em tempo real ao digitar (Ponto para milhar, vírgula para centavos)
   const inputSalarioElem = document.getElementById('input-salario');
   inputSalarioElem.addEventListener('input', (e) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -258,8 +241,6 @@
       render();
       return;
     }
-    
-    // Formata o número dividindo por 100 para criar os centavos
     const options = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
     const result = (parseFloat(value) / 100).toLocaleString('pt-BR', options);
     e.target.value = result;
@@ -267,7 +248,6 @@
     render();
   });
 
-  // Salva no Firestore quando o usuário finaliza a edição do campo
   inputSalarioElem.addEventListener('change', async () => {
     const salarioRef = doc(db, "salarios", `${uid}_${selectedMonth}`);
     await setDoc(salarioRef, { valor: salarioAtual, userId: uid, month: selectedMonth });
@@ -344,7 +324,6 @@
     elemSobra.textContent = `R$ ${formatarMoeda(sobra)}`;
     elemSobra.style.color = sobra < 0 ? 'var(--vencida)' : 'var(--primary)';
 
-    // Atualiza Barra de Progresso visual
     const barra = document.getElementById('barra-progresso');
     const txtPorcentagem = document.getElementById('porcentagem-uso');
 
@@ -414,8 +393,16 @@
     const desc = document.getElementById('desc').value;
     const valor = parseFloat(document.getElementById('valor').value);
     const qtd = parseInt(document.getElementById('qtd').value) || 1;
-    const [y, m, d] = document.getElementById('data').value.split('-').map(Number);
+    const dataInput = document.getElementById('data').value;
     
+    if (!dataInput) {
+      alert("Informe a data de vencimento!");
+      btn.textContent = originalText;
+      btn.classList.remove('btn-loading');
+      return;
+    }
+
+    const [y, m, d] = dataInput.split('-').map(Number);
     const parcelas = [];
     for(let i=0; i<qtd; i++) {
       const dt = new Date(y, m-1+i, d);
@@ -427,7 +414,7 @@
       await addDoc(collection(db, "despesas"), { desc, parcelas, userId: uid });
       e.target.reset();
     } catch (err) {
-      alert("Erro ao salvar!");
+      alert("Erro ao salvar despesa!");
     } finally {
       btn.textContent = originalText;
       btn.classList.remove('btn-loading');
