@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Viana Controle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b;
+      --border: #e2e8f0; --primary: #3b82f6;
+      --vencida: #ef4444; --paga: #10b981; --info: #6366f1; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8;
+              --border: #334155; --vencida: #f87171; --paga: #34d399; }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; }
+    .app { width: 100%; max-width: 420px; }
+
+    header { margin-bottom: 15px; text-align: center; }
+    h1 { font-size: 24px; font-weight: 800; color: var(--primary); margin-bottom: 15px; }
+    
+    .month-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--card); padding: 10px; border-radius: 14px; box-shadow: var(--shadow); border: 1px solid var(--border);
+    }
+    .month-nav button { width: 40px; height: 40px; border: none; background: var(--bg); border-radius: 10px; cursor: pointer; color: var(--text); font-size: 18px; }
+    #month-label { font-weight: 700; text-transform: capitalize; font-size: 15px; }
+
+    /* Salário Card */
+    .salario-card {
+      background: var(--card); padding: 12px 16px; border-radius: 14px;
+      border: 1px solid var(--border); box-shadow: var(--shadow); margin-top: 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .salario-card label { margin-bottom: 0; white-space: nowrap; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .salario-card input { width: 160px; padding: 8px; font-weight: 700; text-align: right; }
+
+    /* Resumo Grid */
+    .resumo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0 12px 0; }
+    .resumo-item { background: var(--card); padding: 12px 8px; border-radius: 12px; border: 1px solid var(--border); text-align: center; box-shadow: var(--shadow); }
+    .resumo-item label { display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .resumo-item span { font-size: 13px; font-weight: 700; display: block; }
+
+    /* Barra de Progresso */
+    .progress-container {
+      background: var(--card); padding: 12px 16px; border-radius: 14px;
+      border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 20px;
+    }
+
+    .card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    form { display: grid; gap: 12px; }
+    label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 4px; }
+    
+    input { 
+      width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; 
+      background: var(--bg); color: var(--text); font-size: 16px; outline: none; transition: 0.2s; 
+      text-align: center;
+    }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    
+    input[type="date"] {
+      display: flex; align-items: center; justify-content: center; min-height: 48px; -webkit-appearance: none; appearance: none;
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    
+    .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--primary); color: white; font-weight: 700; cursor: pointer; font-size: 15px; transition: all 0.2s ease; margin-top: 5px; }
+    .btn:active { transform: scale(0.96); opacity: 0.9; }
+    .btn-loading { background: var(--muted); pointer-events: none; }
+    .btn-cancel { background: var(--muted); margin-top: 5px; }
+
+    .lista-container { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+    
+    .item { 
+      display: flex; justify-content: space-between; align-items: center; 
+      padding: 16px; border-bottom: 1px solid var(--border); transition: 0.3s;
+    }
+    
+    .item.status-paga { border-left: 6px solid var(--paga); background: rgba(16, 185, 129, 0.04); }
+    .item.status-paga .name { color: var(--muted); text-decoration: line-through; }
+    .item.status-vencida { border-left: 6px solid var(--vencida); background: rgba(239, 68, 68, 0.04); }
+
+    .name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+    .parcela-tag { font-size: 10px; background: var(--border); padding: 2px 6px; border-radius: 4px; color: var(--muted); }
+    .meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    
+    .actions-group { display: flex; gap: 6px; }
+    .btn-action { width: 34px; height: 34px; border: none; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+    .btn-action:hover { background: var(--border); }
+    .btn-sair { background: transparent; color: var(--muted); border: none; margin-top: 20px; width: 100%; font-size: 13px; text-decoration: underline; cursor: pointer; }
+    
+    .field-group { text-align: center; }
+
+    /* Modal de Edição */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content { background: var(--card); padding: 20px; border-radius: 16px; width: 100%; max-width: 380px; box-shadow: var(--shadow); }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>Viana Controle</h1>
+    <div class="month-nav">
+      <button id="prev">←</button>
+      <span id="month-label"></span>
+      <button id="next">→</button>
+    </div>
+
+    <!-- Campo do Salário com Máscara de Moeda (Ponto e Vírgula) -->
+    <div class="salario-card">
+      <label>💵 Salário Mês (R$)</label>
+      <input type="text" id="input-salario" placeholder="0,00" inputmode="numeric" />
+    </div>
+  </header>
+
+  <!-- Cards de Resumo Financeiro -->
+  <div class="resumo-grid">
+    <div class="resumo-item" style="border-bottom: 3px solid var(--info);">
+      <label>Total Mês</label>
+      <span id="total-mes">R$ 0,00</span>
+    </div>
+    <div class="resumo-item" style="border-bottom: 3px solid var(--vencida);">
+      <label>A Pagar (Pendente)</label>
+      <span id="total-pendente" style="color: var(--vencida);">R$ 0,00</span>
+    </div>
+    <div class="resumo-item" style="border-bottom: 3px solid var(--paga);">
+      <label>Já Pago</label>
+      <span id="total-pago" style="color: var(--paga);">R$ 0,00</span>
+    </div>
+    <div class="resumo-item" style="border-bottom: 3px solid var(--primary);">
+      <label>Sobra (Livre)</label>
+      <span id="total-sobra">R$ 0,00</span>
+    </div>
+  </div>
+
+  <!-- Barra de Progresso visual -->
+  <div class="progress-container">
+    <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">
+      <span>Comprometimento do Salário</span>
+      <span id="porcentagem-uso">0%</span>
+    </div>
+    <div style="width: 100%; background: var(--bg); height: 10px; border-radius: 5px; overflow: hidden; border: 1px solid var(--border);">
+      <div id="barra-progresso" style="width: 0%; height: 100%; background: var(--paga); transition: width 0.4s ease, background-color 0.4s ease;"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <form id="form">
+      <div class="field-group">
+        <label>O que comprou?</label>
+        <input type="text" id="desc" placeholder="Ex: Mercado" required />
+      </div>
+      <div class="row">
+        <div class="field-group"><label>Valor (R$)</label><input type="number" id="valor" step="0.01" inputmode="decimal" required /></div>
+        <div class="field-group"><label>Parcelas</label><input type="number" id="qtd" value="1" min="1" /></div>
+      </div>
+      <div class="field-group">
+        <label>Data de Vencimento</label>
+        <input type="date" id="data" required />
+      </div>
+      <button type="submit" id="btn-submit" class="btn">Adicionar Conta</button>
+    </form>
+  </div>
+
+  <div id="lista" class="lista-container"></div>
+  <button id="sair" class="btn btn-sair">Sair do Sistema</button>
+</div>
+
+<!-- Modal Edição -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-content">
+    <h3 style="margin-bottom: 15px; text-align: center;">Editar Conta</h3>
+    <form id="form-edit">
+      <input type="hidden" id="edit-doc-id">
+      <div class="field-group">
+        <label>Descrição</label>
+        <input type="text" id="edit-desc" required />
+      </div>
+      <div class="field-group">
+        <label>Valor da Parcela (R$)</label>
+        <input type="number" id="edit-valor" step="0.01" required />
+      </div>
+      <button type="submit" class="btn">Salvar Alterações</button>
+      <button type="button" class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, where, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+  const config = {
+    apiKey: "AIzaSyAjgQTdQmo63-0mR8k1bVYsY0E8I7Iqbnk", 
+    authDomain: "will-gasto.firebaseapp.com",
+    projectId: "will-gasto", 
+    storageBucket: "will-gasto.firebasestorage.app",
+    messagingSenderId: "436819384776", 
+    appId: "1:436819384776:web:37c4c1173c543c0d1dc8fd"
+  };
+
+  const app = initializeApp(config), db = getFirestore(app), auth = getAuth(app);
+  let uid = null, allData = [], salarioAtual = 0;
+  
+  const d = new Date();
+  let selectedMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+  const formatarMoeda = (v) => Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Converte string formatada "1.250,50" para o número 1250.50
+  const parseMoeda = (valorTexto) => {
+    if (!valorTexto) return 0;
+    const numLimpo = valorTexto.replace(/\./g, '').replace(',', '.');
+    return parseFloat(numLimpo) || 0;
+  };
+
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      uid = user.uid;
+      loadSalario();
+      loadData();
+    } else {
+      window.location.href = "login.html";
+    }
+  });
+
+  async function loadSalario() {
+    const salarioRef = doc(db, "salarios", `${uid}_${selectedMonth}`);
+    const snap = await getDoc(salarioRef);
+    const inputSalario = document.getElementById('input-salario');
+
+    if (snap.exists() && snap.data().valor) {
+      salarioAtual = snap.data().valor;
+      inputSalario.value = formatarMoeda(salarioAtual);
+    } else {
+      salarioAtual = 0;
+      inputSalario.value = '';
+    }
+    render();
+  }
+
+  // Máscara monetária em tempo real ao digitar (Ponto para milhar, vírgula para centavos)
+  const inputSalarioElem = document.getElementById('input-salario');
+  inputSalarioElem.addEventListener('input', (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (!value) {
+      e.target.value = '';
+      salarioAtual = 0;
+      render();
+      return;
+    }
+    
+    // Formata o número dividindo por 100 para criar os centavos
+    const options = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+    const result = (parseFloat(value) / 100).toLocaleString('pt-BR', options);
+    e.target.value = result;
+    salarioAtual = parseMoeda(result);
+    render();
+  });
+
+  // Salva no Firestore quando o usuário finaliza a edição do campo
+  inputSalarioElem.addEventListener('change', async () => {
+    const salarioRef = doc(db, "salarios", `${uid}_${selectedMonth}`);
+    await setDoc(salarioRef, { valor: salarioAtual, userId: uid, month: selectedMonth });
+  });
+
+  function loadData() {
+    onSnapshot(query(collection(db, "despesas"), where("userId", "==", uid)), snap => {
+      allData = [];
+      snap.forEach(d => {
+        const data = d.data();
+        if (data.parcelas) {
+          data.parcelas.forEach((p, index) => {
+            allData.push({ ...p, desc: data.desc, docId: d.id, nParc: index + 1, totalParc: data.parcelas.length });
+          });
+        }
+      });
+      render();
+    });
+  }
+
+  function render() {
+    const box = document.getElementById('lista');
+    const monthData = allData.filter(i => i.date && i.date.startsWith(selectedMonth)).sort((a,b) => a.date.localeCompare(b.date));
+    
+    const [year, month] = selectedMonth.split('-');
+    const dateRef = new Date(parseInt(year), parseInt(month) - 1, 1);
+    document.getElementById('month-label').textContent = dateRef.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+    const hoje = new Date().toISOString().slice(0, 10);
+    let somaTotal = 0, somaPendente = 0, somaPago = 0;
+    box.innerHTML = '';
+
+    if(monthData.length === 0) {
+        box.innerHTML = '<div style="padding:40px; text-align:center; color:var(--muted); font-size:14px;">Nenhuma conta este mês.</div>';
+        atualizarResumo(0, 0, 0);
+        return;
+    }
+
+    monthData.forEach((item) => {
+      somaTotal += item.value;
+      if (item.paid) somaPago += item.value;
+      else somaPendente += item.value;
+
+      const dia = item.date.split('-')[2];
+      const estaVencida = item.date < hoje && !item.paid;
+      const statusClass = item.paid ? 'status-paga' : (estaVencida ? 'status-vencida' : '');
+      
+      const div = document.createElement('div');
+      div.className = `item ${statusClass}`;
+      
+      div.innerHTML = `
+        <div>
+          <div class="name">${item.desc} ${item.totalParc > 1 ? `<span class="parcela-tag">${item.nParc}/${item.totalParc}</span>` : ''} ${estaVencida ? '⚠️' : ''}</div>
+          <div class="meta">Dia ${dia} • <strong>R$ ${formatarMoeda(item.value)}</strong></div>
+        </div>
+        <div class="actions-group">
+          <button class="btn-action" title="Marcar Pago" onclick="toggleStatus('${item.docId}','${item.id}')">${item.paid ? '↩️' : '✅'}</button>
+          <button class="btn-action" title="Editar" onclick="abrirEditar('${item.docId}','${item.desc}',${item.value})">✏️</button>
+          <button class="btn-action" title="Excluir" onclick="excluir('${item.docId}')">🗑️</button>
+        </div>`;
+      box.appendChild(div);
+    });
+
+    atualizarResumo(somaTotal, somaPendente, somaPago);
+  }
+
+  function atualizarResumo(total, pendente, pago) {
+    const sobra = salarioAtual - total;
+    document.getElementById('total-mes').textContent = `R$ ${formatarMoeda(total)}`;
+    document.getElementById('total-pendente').textContent = `R$ ${formatarMoeda(pendente)}`;
+    document.getElementById('total-pago').textContent = `R$ ${formatarMoeda(pago)}`;
+    
+    const elemSobra = document.getElementById('total-sobra');
+    elemSobra.textContent = `R$ ${formatarMoeda(sobra)}`;
+    elemSobra.style.color = sobra < 0 ? 'var(--vencida)' : 'var(--primary)';
+
+    // Atualiza Barra de Progresso visual
+    const barra = document.getElementById('barra-progresso');
+    const txtPorcentagem = document.getElementById('porcentagem-uso');
+
+    if (salarioAtual > 0) {
+      const porcentagemReal = Math.round((total / salarioAtual) * 100);
+      const porcentagemBarra = Math.min(porcentagemReal, 100);
+      
+      txtPorcentagem.textContent = `${porcentagemReal}%`;
+      barra.style.width = `${porcentagemBarra}%`;
+
+      if (porcentagemReal > 100) {
+        barra.style.backgroundColor = 'var(--vencida)';
+      } else if (porcentagemReal > 80) {
+        barra.style.backgroundColor = '#f59e0b';
+      } else {
+        barra.style.backgroundColor = 'var(--paga)';
+      }
+    } else {
+      txtPorcentagem.textContent = '0%';
+      barra.style.width = '0%';
+    }
+  }
+
+  window.toggleStatus = async (docId, pId) => {
+    const ref = doc(db, "despesas", docId), snap = await getDoc(ref);
+    if (snap.exists()) {
+      const novasParcelas = snap.data().parcelas.map(p => p.id === pId ? { ...p, paid: !p.paid } : p);
+      await updateDoc(ref, { parcelas: novasParcelas });
+    }
+  };
+
+  window.abrirEditar = (docId, desc, valor) => {
+    document.getElementById('edit-doc-id').value = docId;
+    document.getElementById('edit-desc').value = desc;
+    document.getElementById('edit-valor').value = valor;
+    document.getElementById('edit-modal').classList.add('active');
+  };
+
+  window.fecharModal = () => {
+    document.getElementById('edit-modal').classList.remove('active');
+  };
+
+  document.getElementById('form-edit').onsubmit = async (e) => {
+    e.preventDefault();
+    const docId = document.getElementById('edit-doc-id').value;
+    const desc = document.getElementById('edit-desc').value;
+    const valor = parseFloat(document.getElementById('edit-valor').value);
+
+    const ref = doc(db, "despesas", docId);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const parcelasAtualizadas = snap.data().parcelas.map(p => ({ ...p, value: valor }));
+      await updateDoc(ref, { desc, parcelas: parcelasAtualizadas });
+    }
+    fecharModal();
+  };
+
+  window.excluir = async (id) => { if(confirm('Apagar esta conta e todas as suas parcelas?')) await deleteDoc(doc(db, "despesas", id)); };
+
+  document.getElementById('form').onsubmit = async e => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit');
+    const originalText = btn.textContent;
+    btn.textContent = "Salvando...";
+    btn.classList.add('btn-loading');
+
+    const desc = document.getElementById('desc').value;
+    const valor = parseFloat(document.getElementById('valor').value);
+    const qtd = parseInt(document.getElementById('qtd').value) || 1;
+    const [y, m, d] = document.getElementById('data').value.split('-').map(Number);
+    
+    const parcelas = [];
+    for(let i=0; i<qtd; i++) {
+      const dt = new Date(y, m-1+i, d);
+      const strDate = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+      parcelas.push({ id: Math.random().toString(36).slice(2,9), value: valor, date: strDate, paid: false });
+    }
+
+    try {
+      await addDoc(collection(db, "despesas"), { desc, parcelas, userId: uid });
+      e.target.reset();
+    } catch (err) {
+      alert("Erro ao salvar!");
+    } finally {
+      btn.textContent = originalText;
+      btn.classList.remove('btn-loading');
+    }
+  };
+
+  document.getElementById('prev').onclick = () => changeMonth(-1);
+  document.getElementById('next').onclick = () => changeMonth(1);
+  function changeMonth(dir) {
+    const [y, m] = selectedMonth.split('-').map(Number);
+    const dt = new Date(y, m - 1 + dir, 1);
+    selectedMonth = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+    loadSalario();
+  }
+  document.getElementById('sair').onclick = () => confirm('Deseja sair?') && signOut(auth);
+</script>
+</body>
+</html>
