@@ -51,12 +51,12 @@
     form { display: grid; gap: 12px; }
     label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 4px; }
     
-    input { 
+    input, select { 
       width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; 
       background: var(--bg); color: var(--text); font-size: 16px; outline: none; transition: 0.2s; 
       text-align: center;
     }
-    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
     input[type="date"] { display: flex; align-items: center; justify-content: center; min-height: 48px; -webkit-appearance: none; appearance: none; }
 
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -76,13 +76,15 @@
 
     .name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 6px; }
     .parcela-tag { font-size: 10px; background: var(--border); padding: 2px 6px; border-radius: 4px; color: var(--muted); }
-    .meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .meta { font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; gap: 6px; }
     
     .actions-group { display: flex; gap: 6px; }
     .btn-action { width: 34px; height: 34px; border: none; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
     .btn-action:hover { background: var(--border); }
     .btn-sair { background: transparent; color: var(--muted); border: none; margin-top: 20px; width: 100%; font-size: 13px; text-decoration: underline; cursor: pointer; }
     .field-group { text-align: center; }
+
+    .calc-info { font-size: 12px; font-weight: 600; color: var(--primary); margin-top: 2px; text-align: center; display: none; }
 
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -144,10 +146,24 @@
         <label>O que comprou?</label>
         <input type="text" id="desc" placeholder="Ex: Mercado" required />
       </div>
-      <div class="row">
-        <div class="field-group"><label>Valor (R$)</label><input type="number" id="valor" step="0.01" inputmode="decimal" required /></div>
-        <div class="field-group"><label>Parcelas</label><input type="number" id="qtd" value="1" min="1" /></div>
+      <div class="field-group">
+        <label>Tipo de Valor</label>
+        <select id="tipo-calculo">
+          <option value="total">Valor Total da Compra (Dividir)</option>
+          <option value="parcela">Valor Fixo por Parcela</option>
+        </select>
       </div>
+      <div class="row">
+        <div class="field-group">
+          <label id="label-valor">Valor Total (R$)</label>
+          <input type="number" id="valor" step="0.01" inputmode="decimal" placeholder="0.00" required />
+        </div>
+        <div class="field-group">
+          <label>Parcelas</label>
+          <input type="number" id="qtd" value="1" min="1" />
+        </div>
+      </div>
+      <div id="calc-preview" class="calc-info"></div>
       <div class="field-group">
         <label>Data de Vencimento</label>
         <input type="date" id="data" required />
@@ -253,6 +269,43 @@
     await setDoc(salarioRef, { valor: salarioAtual, userId: uid, month: selectedMonth });
   });
 
+  // Atualização em tempo real do cálculo de parcelas
+  const inputValor = document.getElementById('valor');
+  const inputQtd = document.getElementById('qtd');
+  const selectTipo = document.getElementById('tipo-calculo');
+  const labelValor = document.getElementById('label-valor');
+  const calcPreview = document.getElementById('calc-preview');
+
+  function atualizarCalculoParcela() {
+    const val = parseFloat(inputValor.value) || 0;
+    const qtd = parseInt(inputQtd.value) || 1;
+    const tipo = selectTipo.value;
+
+    if (tipo === 'total') {
+      labelValor.textContent = 'Valor Total (R$)';
+      if (val > 0 && qtd > 1) {
+        const valParc = val / qtd;
+        calcPreview.style.display = 'block';
+        calcPreview.textContent = `💡 ${qtd}x de R$ ${formatarMoeda(valParc)} por mês`;
+      } else {
+        calcPreview.style.display = 'none';
+      }
+    } else {
+      labelValor.textContent = 'Valor por Parcela (R$)';
+      if (val > 0 && qtd > 1) {
+        const valTotal = val * qtd;
+        calcPreview.style.display = 'block';
+        calcPreview.textContent = `💡 Total da compra: R$ ${formatarMoeda(valTotal)}`;
+      } else {
+        calcPreview.style.display = 'none';
+      }
+    }
+  }
+
+  inputValor.addEventListener('input', atualizarCalculoParcela);
+  inputQtd.addEventListener('input', atualizarCalculoParcela);
+  selectTipo.addEventListener('change', atualizarCalculoParcela);
+
   function loadData() {
     onSnapshot(query(collection(db, "despesas"), where("userId", "==", uid)), snap => {
       allData = [];
@@ -281,9 +334,9 @@
     box.innerHTML = '';
 
     if(monthData.length === 0) {
-        box.innerHTML = '<div style="padding:40px; text-align:center; color:var(--muted); font-size:14px;">Nenhuma conta este mês.</div>';
-        atualizarResumo(0, 0, 0);
-        return;
+      box.innerHTML = '<div style="padding:40px; text-align:center; color:var(--muted); font-size:14px;">Nenhuma conta este mês.</div>';
+      atualizarResumo(0, 0, 0);
+      return;
     }
 
     monthData.forEach((item) => {
@@ -301,7 +354,7 @@
       div.innerHTML = `
         <div>
           <div class="name">${item.desc} ${item.totalParc > 1 ? `<span class="parcela-tag">${item.nParc}/${item.totalParc}</span>` : ''} ${estaVencida ? '⚠️' : ''}</div>
-          <div class="meta">Dia ${dia} • <strong>R$ ${formatarMoeda(item.value)}</strong></div>
+          <div class="meta">Dia ${dia} — <strong>R$ ${formatarMoeda(item.value)}</strong></div>
         </div>
         <div class="actions-group">
           <button class="btn-action" title="Marcar Pago" onclick="toggleStatus('${item.docId}','${item.id}')">${item.paid ? '↩️' : '✅'}</button>
@@ -378,7 +431,7 @@
       const parcelasAtualizadas = snap.data().parcelas.map(p => ({ ...p, value: valor }));
       await updateDoc(ref, { desc, parcelas: parcelasAtualizadas });
     }
-    fecharModal();
+    window.fecharModal();
   };
 
   window.excluir = async (id) => { if(confirm('Apagar esta conta e todas as suas parcelas?')) await deleteDoc(doc(db, "despesas", id)); };
@@ -391,9 +444,10 @@
     btn.classList.add('btn-loading');
 
     const desc = document.getElementById('desc').value;
-    const valor = parseFloat(document.getElementById('valor').value);
+    const valorDigitado = parseFloat(document.getElementById('valor').value);
     const qtd = parseInt(document.getElementById('qtd').value) || 1;
     const dataInput = document.getElementById('data').value;
+    const tipo = selectTipo.value;
     
     if (!dataInput) {
       alert("Informe a data de vencimento!");
@@ -402,17 +456,31 @@
       return;
     }
 
+    // Calcula o valor final de cada parcela
+    const valorParcela = tipo === 'total' ? (valorDigitado / qtd) : valorDigitado;
+
     const [y, m, d] = dataInput.split('-').map(Number);
     const parcelas = [];
-    for(let i=0; i<qtd; i++) {
-      const dt = new Date(y, m-1+i, d);
+    
+    for(let i = 0; i < qtd; i++) {
+      let targetMonth = m - 1 + i;
+      let targetYear = y + Math.floor(targetMonth / 12);
+      targetMonth = targetMonth % 12;
+      
+      const lastDayOfTargetMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+      const actualDay = Math.min(d, lastDayOfTargetMonth);
+      
+      const dt = new Date(targetYear, targetMonth, actualDay);
       const strDate = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
-      parcelas.push({ id: Math.random().toString(36).slice(2,9), value: valor, date: strDate, paid: false });
+      parcelas.push({ id: Math.random().toString(36).slice(2, 9), value: valorParcela, date: strDate, paid: false });
     }
 
     try {
       await addDoc(collection(db, "despesas"), { desc, parcelas, userId: uid });
       e.target.reset();
+      document.getElementById('qtd').value = '1';
+      calcPreview.style.display = 'none';
+      atualizarCalculoParcela();
     } catch (err) {
       alert("Erro ao salvar despesa!");
     } finally {
