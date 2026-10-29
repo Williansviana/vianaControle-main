@@ -1,7 +1,17 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+  import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    signOut 
+  } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  import { 
+    getFirestore, 
+    doc, 
+    getDoc, 
+    setDoc 
+  } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAjgQTdQmo63-0mR8k1bVYsY0E8I7Iqbnk",
@@ -16,118 +26,139 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  // Payload Pix
+  const PIX_STRING = "00020126360014BR.GOV.BCB.PIX0114+55199967968515204000030398654043.005802BR5901N6001C62070503***63049D51";
+
+  // Registro do Service Worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     });
   }
 
-  // Função auxiliar para exibir feedback no card
+  // Função auxiliar para mensagens de feedback
   function exibirMensagem(texto, tipo = "err") {
     const fb = document.getElementById('feedback');
+    if (!fb) return;
     fb.textContent = texto;
     fb.className = `msg ${tipo}`;
     fb.style.display = "block";
   }
 
-  document.getElementById('btnLogin').onclick = async () => {
-    const email = document.getElementById('email').value.trim();
-    const senha = document.getElementById('senha').value;
-    const btn = document.getElementById('btnLogin');
-
-    if(!email || !senha) {
-      exibirMensagem("⚠️ Informe o e-mail e a senha.");
-      return;
-    }
-
-    btn.disabled = true; 
-    btn.textContent = "Processando..."; 
-    document.getElementById('feedback').style.display = "none";
-
-    try {
-      let userRes;
-      try {
-        // 1. Tenta fazer o Login
-        userRes = await signInWithEmailAndPassword(auth, email, senha);
-      } catch (err) {
-        // 2. Se a conta não existe, cria uma nova
-        if (err.code === 'auth/user-not-found') {
-          userRes = await createUserWithEmailAndPassword(auth, email, senha);
-          await setDoc(doc(db, "usuarios", userRes.user.uid), { 
-            email, 
-            aprovado: false,
-            criadoEm: new Date().toISOString()
-          });
-        } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
-          // Se falhou as credenciais, verifica se o usuário tenta se cadastrar pela primeira vez
-          try {
-            userRes = await createUserWithEmailAndPassword(auth, email, senha);
-            await setDoc(doc(db, "usuarios", userRes.user.uid), { 
-              email, 
-              aprovado: false,
-              criadoEm: new Date().toISOString()
-            });
-          } catch (createErr) {
-            // Se falhou ao criar porque já existe, a senha informada estava errada!
-            if (createErr.code === 'auth/email-already-in-use') {
-              throw new Error("Senha incorreta. Verifique os dados digitados.");
-            }
-            throw createErr;
-          }
-        } else { 
-          throw err; 
-        }
-      }
-
-      // 3. Verifica no Firestore a liberação do acesso
-      const userDoc = await getDoc(doc(db, "usuarios", userRes.user.uid));
-      
-      if (userDoc.exists() && userDoc.data().aprovado === true) {
-        window.location.href = "index.html"; 
-      } else {
-        exibirMensagem("✅ Conta criada/localizada! Faça o pagamento abaixo para liberar seu acesso.", "success");
-        switchTab('pagamento');
-        await signOut(auth);
-      }
-    } catch (e) {
-      const mensagemErro = e.message.includes("Senha incorreta") 
-        ? e.message 
-        : "❌ Erro ao acessar. Verifique seus dados ou tente novamente.";
-      exibirMensagem(mensagemErro, "err");
-    } finally {
-      btn.disabled = false; 
-      btn.textContent = "Acessar Sistema";
-    }
-  };
-
-  // Payload Pix
-  const PIX_STRING = "00020126360014BR.GOV.BCB.PIX0114+55199967968515204000030398654043.005802BR5901N6001C62070503***63049D51";
-
+  // Manipulação de Abas
   window.switchTab = (tab) => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-    document.getElementById(`section-${tab}`).classList.add('active');
-    document.getElementById(`btn-tab-${tab}`).classList.add('active');
-    document.getElementById('feedback').style.display = "none";
+    
+    const targetSection = document.getElementById(`section-${tab}`);
+    const targetBtn = document.getElementById(`btn-tab-${tab}`);
+    
+    if (targetSection) targetSection.classList.add('active');
+    if (targetBtn) targetBtn.classList.add('active');
+    
+    const fb = document.getElementById('feedback');
+    if (fb) fb.style.display = "none";
   };
 
+  // Fluxo Principal de Acesso / Cadastro
+  const btnLogin = document.getElementById('btnLogin');
+  if (btnLogin) {
+    btnLogin.onclick = async () => {
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value;
+
+      if (!email || !senha) {
+        exibirMensagem("⚠️ Informe o e-mail e a senha.");
+        return;
+      }
+
+      btnLogin.disabled = true;
+      btnLogin.textContent = "Processando...";
+      const fb = document.getElementById('feedback');
+      if (fb) fb.style.display = "none";
+
+      try {
+        let userRes;
+
+        try {
+          // 1. Tenta Login
+          userRes = await signInWithEmailAndPassword(auth, email, senha);
+        } catch (loginErr) {
+          // 2. Se a conta não existe (ou credencial nova), tenta criar
+          if (loginErr.code === 'auth/user-not-found' || loginErr.code === 'auth/invalid-credential') {
+            try {
+              userRes = await createUserWithEmailAndPassword(auth, email, senha);
+              
+              // Registra o perfil inicial no Firestore
+              await setDoc(doc(db, "usuarios", userRes.user.uid), { 
+                email, 
+                aprovado: false,
+                criadoEm: new Date().toISOString()
+              });
+            } catch (createErr) {
+              if (createErr.code === 'auth/email-already-in-use' || createErr.code === 'auth/wrong-password') {
+                throw new Error("Senha incorreta. Verifique seus dados.");
+              }
+              if (createErr.code === 'auth/weak-password') {
+                throw new Error("A senha deve ter pelo menos 6 caracteres.");
+              }
+              throw createErr;
+            }
+          } else {
+            throw loginErr;
+          }
+        }
+
+        // 3. Checa aprovação no Firestore
+        const userDoc = await getDoc(doc(db, "usuarios", userRes.user.uid));
+        
+        if (userDoc.exists() && userDoc.data().aprovado === true) {
+          window.location.href = "index.html"; 
+        } else {
+          exibirMensagem("✅ Conta criada/localizada! Realize o pagamento abaixo para liberar seu acesso.", "success");
+          window.switchTab('pagamento');
+          await signOut(auth);
+        }
+
+      } catch (e) {
+        exibirMensagem(`❌ ${e.message}`, "err");
+      } finally {
+        btnLogin.disabled = false;
+        btnLogin.textContent = "Acessar Sistema";
+      }
+    };
+  }
+
+  // Funções Pix e WhatsApp
   window.gerarPix = () => {
     const qrCont = document.getElementById('qrcode');
+    if (!qrCont) return;
     qrCont.style.display = "block"; 
     qrCont.innerHTML = "";
-    new QRCode(qrCont, { text: PIX_STRING, width: 170, height: 170 });
+    
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(qrCont, { text: PIX_STRING, width: 170, height: 170 });
+    }
+    
     document.getElementById('pix-text').textContent = PIX_STRING;
     document.getElementById('pix-area-container').style.display = "block";
   };
 
-  window.copiarPix = () => {
-    navigator.clipboard.writeText(PIX_STRING);
-    alert("Código Pix Copiado!");
+  window.copiarPix = async () => {
+    try {
+      await navigator.clipboard.writeText(PIX_STRING);
+      alert("Código Pix copiado com sucesso!");
+    } catch {
+      alert("Não foi possível copiar automaticamente. Copie o texto exibido.");
+    }
   };
 
   window.validarZap = () => {
     const nome = document.getElementById('nome-usuario').value;
-    document.getElementById('btn-whatsapp').style.display = nome.trim().length >= 3 ? 'flex' : 'none';
+    const btnZap = document.getElementById('btn-whatsapp');
+    if (btnZap) {
+      btnZap.style.display = nome.trim().length >= 3 ? 'flex' : 'none';
+    }
   };
 
   window.enviarZap = () => {
