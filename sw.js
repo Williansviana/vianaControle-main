@@ -1,16 +1,16 @@
-const CACHE_NAME = 'viana-v5';
-const ASSETS = [
-  './login.html',
-  './index.html',
-  './pagamento.html',
-  './manifest.json',
-  './img/logo_oficial.png',
-];
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
-});
+const auth = getAuth(app);
 
-self.addEventListener('fetch', e => {
-  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+// Monitora o estado de autenticação em tempo real
+onAuthStateChanged(auth, user => {
+  if (user) {
+    // Usuário autenticado: inicializa o sistema
+    uid = user.uid;
+    loadSalario();
+    loadData();
+  } else {
+    // Usuário não autenticado: redireciona para a página de login
+    window.location.replace("login.html");
+  }
 });

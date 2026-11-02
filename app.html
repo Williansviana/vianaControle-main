@@ -1,496 +1,258 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang=" pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Viana Controle</title>
-  
-  <!-- Prevenção de Cache: Força o navegador a carregar sempre a versão mais recente -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6a11cb">
+  <link rel="icon" href="./img/logo_oficial.png" type="image/png">
+  <link rel="apple-touch-icon" href="./img/logo_oficial.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Viana Controle">
+
+  <title>Viana Controle - Acesso</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
   <style>
     :root {
-      --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --muted: #64748b;
-      --border: #e2e8f0; --primary: #3b82f6;
-      --vencida: #ef4444; --paga: #10b981; --info: #6366f1; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --primary: #6a11cb;
+      --secondary: #2575fc;
+      --text-dark: #1e293b;
+      --glass: rgba(255, 255, 255, 0.95);
     }
-    @media (prefers-color-scheme: dark) {
-      :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8;
-              --border: #334155; --vencida: #f87171; --paga: #34d399; }
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
     
-    /* Mantém oculto até a validação do login para não piscar conteúdo antigo */
-    .app { width: 100%; max-width: 420px; display: none; }
-
-    header { margin-bottom: 15px; text-align: center; }
-    h1 { font-size: 24px; font-weight: 800; color: var(--primary); margin-bottom: 15px; }
-    
-    .month-nav {
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--card); padding: 10px; border-radius: 14px; box-shadow: var(--shadow); border: 1px solid var(--border);
-    }
-    .month-nav button { width: 40px; height: 40px; border: none; background: var(--bg); border-radius: 10px; cursor: pointer; color: var(--text); font-size: 18px; }
-    #month-label { font-weight: 700; text-transform: capitalize; font-size: 15px; }
-
-    .salario-card {
-      background: var(--card); padding: 12px 16px; border-radius: 14px;
-      border: 1px solid var(--border); box-shadow: var(--shadow); margin-top: 12px;
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    }
-    .salario-card label { margin-bottom: 0; white-space: nowrap; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
-    .salario-card input { width: 160px; padding: 8px; font-weight: 700; text-align: right; }
-
-    .resumo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0 12px 0; }
-    .resumo-item { background: var(--card); padding: 12px 8px; border-radius: 12px; border: 1px solid var(--border); text-align: center; box-shadow: var(--shadow); }
-    .resumo-item label { display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-    .resumo-item span { font-size: 13px; font-weight: 700; display: block; }
-
-    .progress-container {
-      background: var(--card); padding: 12px 16px; border-radius: 14px;
-      border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 20px;
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      margin: 0; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
     }
 
-    .card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-    form { display: grid; gap: 12px; }
-    label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 4px; }
-    
-    input { 
-      width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; 
-      background: var(--bg); color: var(--text); font-size: 16px; outline: none; transition: 0.2s; 
+    .login-container {
+      width: 100%; max-width: 420px; padding: 40px 30px;
+      background: var(--glass);
+      backdrop-filter: blur(15px);
+      border-radius: 30px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.4);
       text-align: center;
     }
-    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-    
-    input[type="date"] {
-      display: flex; align-items: center; justify-content: center; min-height: 48px; -webkit-appearance: none; appearance: none;
+
+    .brand-logo { 
+      width: 85px; height: 85px; object-fit: contain; 
+      margin-bottom: 15px; border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    
-    .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--primary); color: white; font-weight: 700; cursor: pointer; font-size: 15px; transition: all 0.2s ease; margin-top: 5px; }
-    .btn:active { transform: scale(0.96); opacity: 0.9; }
-    .btn-loading { background: var(--muted); pointer-events: none; }
-    .btn-cancel { background: var(--muted); margin-top: 5px; }
+    h1 { font-size: 26px; font-weight: 700; color: var(--text-dark); margin: 0; }
+    .subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; }
 
-    .lista-container { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
-    
-    .item { 
-      display: flex; justify-content: space-between; align-items: center; 
-      padding: 16px; border-bottom: 1px solid var(--border); transition: 0.3s;
+    .tabs-nav { 
+      display: flex; background: #f1f5f9; padding: 5px; border-radius: 16px; margin-bottom: 25px;
     }
-    
-    .item.status-paga { border-left: 6px solid var(--paga); background: rgba(16, 185, 129, 0.04); }
-    .item.status-paga .name { color: var(--muted); text-decoration: line-through; }
-    .item.status-vencida { border-left: 6px solid var(--vencida); background: rgba(239, 68, 68, 0.04); }
-
-    .name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 6px; }
-    .parcela-tag { font-size: 10px; background: var(--border); padding: 2px 6px; border-radius: 4px; color: var(--muted); }
-    .meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
-    
-    .actions-group { display: flex; gap: 6px; }
-    .btn-action { width: 34px; height: 34px; border: none; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-    .btn-action:hover { background: var(--border); }
-    .btn-sair { background: transparent; color: var(--muted); border: none; margin-top: 20px; width: 100%; font-size: 13px; text-decoration: underline; cursor: pointer; }
-    
-    .field-group { text-align: center; }
-
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100;
+    .tab-btn { 
+      flex: 1; padding: 12px; border: none; background: none; cursor: pointer; 
+      font-weight: 700; color: #64748b; border-radius: 12px; transition: 0.3s;
     }
-    .modal-overlay.active { display: flex; }
-    .modal-content { background: var(--card); padding: 20px; border-radius: 16px; width: 100%; max-width: 380px; box-shadow: var(--shadow); }
+    .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+    .content-section { display: none; text-align: left; animation: slideUp 0.4s ease-out; }
+    .content-section.active { display: block; }
+
+    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+    .input-group { margin-bottom: 18px; }
+    label { font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px; display: block; padding-left: 4px; }
+    
+    input { 
+      width: 100%; padding: 15px; border: 2px solid #e2e8f0; 
+      border-radius: 14px; font-size: 15px; transition: 0.3s; background: #f8fafc;
+    }
+    input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.1); }
+
+    .btn { 
+      width: 100%; padding: 16px; border: none; border-radius: 14px; 
+      font-weight: 700; cursor: pointer; display: flex; align-items: center; 
+      justify-content: center; gap: 10px; transition: 0.3s; font-size: 15px;
+    }
+    .btn-login { background: linear-gradient(to right, var(--primary), var(--secondary)); color: white; margin-top: 10px; }
+    .btn-pix { background: #1e293b; color: white; }
+    .btn-whatsapp { background: #22c55e; color: white; display: none; margin-top: 15px; }
+
+    #qrcode { text-align: center; margin: 20px 0; display: none; }
+    #qrcode img { margin: 0 auto; border: 8px solid white; border-radius: 15px; }
+    
+    .pix-area {
+      background: #f1f5f9; padding: 15px; border-radius: 12px; border: 2px dashed #cbd5e1;
+      font-size: 11px; word-break: break-all; color: #475569; font-family: monospace; cursor: pointer;
+    }
+
+    .msg { font-size: 13px; margin-top: 20px; display: none; padding: 14px; border-radius: 14px; font-weight: 600; text-align: center; }
+    .err { background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
+    .success { background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
   </style>
 </head>
 <body>
 
-<div class="app" id="app-container">
-  <header>
-    <h1>Viana Controle</h1>
-    <div class="month-nav">
-      <button id="prev">←</button>
-      <span id="month-label"></span>
-      <button id="next">→</button>
-    </div>
+<div class="login-container">
+  <img src="./img/logo_oficial.png" alt="Logo" class="brand-logo">
+  <h1>Viana Controle</h1>
+  <p class="subtitle">Faça login ou libere seu acesso</p>
 
-    <div class="salario-card">
-      <label>💵 Salário Mês (R$)</label>
-      <input type="text" id="input-salario" placeholder="0,00" inputmode="numeric" />
-    </div>
-  </header>
-
-  <div class="resumo-grid">
-    <div class="resumo-item" style="border-bottom: 3px solid var(--info);">
-      <label>Total Mês</label>
-      <span id="total-mes">R$ 0,00</span>
-    </div>
-    <div class="resumo-item" style="border-bottom: 3px solid var(--vencida);">
-      <label>A Pagar (Pendente)</label>
-      <span id="total-pendente" style="color: var(--vencida);">R$ 0,00</span>
-    </div>
-    <div class="resumo-item" style="border-bottom: 3px solid var(--paga);">
-      <label>Já Pago</label>
-      <span id="total-pago" style="color: var(--paga);">R$ 0,00</span>
-    </div>
-    <div class="resumo-item" style="border-bottom: 3px solid var(--primary);">
-      <label>Sobra (Livre)</label>
-      <span id="total-sobra">R$ 0,00</span>
-    </div>
+  <div class="tabs-nav">
+    <button class="tab-btn active" id="btn-tab-login" onclick="switchTab('login')">Entrar</button>
+    <button class="tab-btn" id="btn-tab-pagamento" onclick="switchTab('pagamento')">Liberação</button>
   </div>
 
-  <div class="progress-container">
-    <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">
-      <span>Comprometimento do Salário</span>
-      <span id="porcentagem-uso">0%</span>
+  <div id="section-login" class="content-section active">
+    <div class="input-group">
+      <label>E-mail</label>
+      <input type="email" id="email" placeholder="exemplo@email.com">
     </div>
-    <div style="width: 100%; background: var(--bg); height: 10px; border-radius: 5px; overflow: hidden; border: 1px solid var(--border);">
-      <div id="barra-progresso" style="width: 0%; height: 100%; background: var(--paga); transition: width 0.4s ease, background-color 0.4s ease;"></div>
+    <div class="input-group">
+      <label>Senha</label>
+      <input type="password" id="senha" placeholder="••••••••">
     </div>
+    <button class="btn btn-login" id="btnLogin">Acessar Sistema</button>
   </div>
 
-  <div class="card">
-    <form id="form">
-      <div class="field-group">
-        <label>O que comprou?</label>
-        <input type="text" id="desc" placeholder="Ex: Mercado" required />
-      </div>
-      <div class="row">
-        <div class="field-group"><label>Valor (R$)</label><input type="number" id="valor" step="0.01" inputmode="decimal" required /></div>
-        <div class="field-group"><label>Parcelas</label><input type="number" id="qtd" value="1" min="1" required /></div>
-      </div>
-      <div class="field-group">
-        <label>Data de Vencimento</label>
-        <input type="date" id="data" required />
-      </div>
-      <button type="submit" id="btn-submit" class="btn">Adicionar Conta</button>
-    </form>
+  <div id="section-pagamento" class="content-section">
+    <div style="background: #eff6ff; padding: 15px; border-radius: 14px; margin-bottom: 20px; color: #1e40af; font-size: 13px; line-height: 1.4;">
+      💎 <b>Taxa Única: R$ 5,00</b>. Acesso vitalício liberado após envio do comprovante.
+    </div>
+    
+    <button class="btn btn-pix" onclick="gerarPix()">⚡ Gerar QR Code Pix</button>
+    
+    <div id="qrcode"></div>
+    
+    <div id="pix-area-container" style="display:none; margin-top: 15px;">
+        <div class="pix-area" id="pix-text" onclick="copiarPix()"></div>
+        <p style="font-size: 10px; color: #64748b; text-align: center; margin-top: 8px;">Clique acima para copiar o código</p>
+    </div>
+
+    <div class="input-group" style="margin-top:20px;">
+        <label>Nome do Usuário</label>
+        <input type="text" id="nome-usuario" placeholder="Seu nome completo" onkeyup="validarZap()">
+    </div>
+    <button id="btn-whatsapp" class="btn btn-whatsapp" onclick="enviarZap()">📲 Enviar Comprovante</button>
   </div>
 
-  <div id="lista" class="lista-container"></div>
-  <button id="sair" class="btn btn-sair">Sair do Sistema</button>
+  <div id="feedback" class="msg"></div>
 </div>
 
-<div class="modal-overlay" id="edit-modal">
-  <div class="modal-content">
-    <h3 style="margin-bottom: 15px; text-align: center;">Editar Conta</h3>
-    <form id="form-edit">
-      <input type="hidden" id="edit-doc-id">
-      <input type="hidden" id="edit-parcela-id">
-      <div class="field-group">
-        <label>Descrição</label>
-        <input type="text" id="edit-desc" required />
-      </div>
-      <div class="field-group">
-        <label>Valor da Parcela (R$)</label>
-        <input type="number" id="edit-valor" step="0.01" required />
-      </div>
-      <button type="submit" class="btn">Salvar Alterações</button>
-      <button type="button" class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
-    </form>
-  </div>
-</div>
-
+<!-- Firebase SDK Atualizado (v12.11.0) -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, where, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-  const config = {
-    apiKey: "AIzaSyAjgQTdQmo63-0mR8k1bVYsY0E8I7Iqbnk", 
+  const firebaseConfig = {
+    apiKey: "AIzaSyAjgQTdQmo63-0mR8k1bVYsY0E8I7Iqbnk",
     authDomain: "will-gasto.firebaseapp.com",
-    projectId: "will-gasto", 
+    projectId: "will-gasto",
     storageBucket: "will-gasto.firebasestorage.app",
-    messagingSenderId: "436819384776", 
+    messagingSenderId: "436819384776",
     appId: "1:436819384776:web:37c4c1173c543c0d1dc8fd"
   };
 
-  const app = initializeApp(config), db = getFirestore(app), auth = getAuth(app);
-  let uid = null, allData = [], salarioAtual = 0, debounceSalarioTimeout = null;
-  
-  const d = new Date();
-  let selectedMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-  const formatarMoeda = (v) => Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  const parseMoeda = (valorTexto) => {
-    if (!valorTexto) return 0;
-    const numLimpo = valorTexto.replace(/\./g, '').replace(',', '.');
-    return parseFloat(numLimpo) || 0;
-  };
-
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      uid = user.uid;
-      document.getElementById('app-container').style.display = 'block';
-      loadSalario();
-      loadData();
-    } else {
-      window.location.replace("index.html");
-    }
-  });
-
-  async function loadSalario() {
-    if (!uid) return;
-    const inputSalario = document.getElementById('input-salario');
-    
-    const salarioRef = doc(db, "salarios", `${uid}_${selectedMonth}`);
-    const snap = await getDoc(salarioRef);
-
-    if (snap.exists() && snap.data().valor !== undefined) {
-      salarioAtual = snap.data().valor;
-    } else {
-      const padraoRef = doc(db, "salarios", `${uid}_padrao`);
-      const snapPadrao = await getDoc(padraoRef);
-      if (snapPadrao.exists() && snapPadrao.data().valor !== undefined) {
-        salarioAtual = snapPadrao.data().valor;
-      } else {
-        salarioAtual = 0;
-      }
-    }
-
-    inputSalario.value = salarioAtual > 0 ? formatarMoeda(salarioAtual) : '';
-    render();
-  }
-
-  const inputSalarioElem = document.getElementById('input-salario');
-  inputSalarioElem.addEventListener('input', (e) => {
-    let value = e.target.value.replace(/\D/g, '');
-    
-    if (!value) {
-      e.target.value = '';
-      salarioAtual = 0;
-    } else {
-      const options = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
-      const result = (parseFloat(value) / 100).toLocaleString('pt-BR', options);
-      e.target.value = result;
-      salarioAtual = parseMoeda(result);
-    }
-
-    recalcularResumoSemReRender();
-
-    clearTimeout(debounceSalarioTimeout);
-    debounceSalarioTimeout = setTimeout(async () => {
-      if (!uid) return;
-      
-      const salarioRef = doc(db, "salarios", `${uid}_${selectedMonth}`);
-      await setDoc(salarioRef, { valor: salarioAtual, userId: uid, month: selectedMonth });
-
-      const padraoRef = doc(db, "salarios", `${uid}_padrao`);
-      await setDoc(padraoRef, { valor: salarioAtual, userId: uid });
-    }, 500);
-  });
-
-  function loadData() {
-    onSnapshot(query(collection(db, "despesas"), where("userId", "==", uid)), snap => {
-      allData = [];
-      snap.forEach(d => {
-        const data = d.data();
-        if (data.parcelas) {
-          data.parcelas.forEach((p, index) => {
-            allData.push({ ...p, desc: data.desc, docId: d.id, nParc: index + 1, totalParc: data.parcelas.length });
-          });
-        }
-      });
-      render();
+  // Registro do SW para PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
     });
   }
 
-  function render() {
-    const box = document.getElementById('lista');
-    const monthData = allData.filter(i => i.date && i.date.startsWith(selectedMonth)).sort((a,b) => a.date.localeCompare(b.date));
-    
-    const [year, month] = selectedMonth.split('-');
-    const dateRef = new Date(parseInt(year), parseInt(month) - 1, 1);
-    document.getElementById('month-label').textContent = dateRef.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  // LÓGICA DE LOGIN/CADASTRO
+  // LÓGICA DE LOGIN/CADASTRO
+  document.getElementById('btnLogin').onclick = async () => {
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value;
+    const fb = document.getElementById('feedback');
+    const btn = document.getElementById('btnLogin');
 
-    const hoje = new Date().toISOString().slice(0, 10);
-    let somaTotal = 0, somaPendente = 0, somaPago = 0;
-    box.innerHTML = '';
-
-    if(monthData.length === 0) {
-        box.innerHTML = '<div style="padding:40px; text-align:center; color:var(--muted); font-size:14px;">Nenhuma conta este mês.</div>';
-        atualizarResumo(0, 0, 0);
+    if(!email || !senha) {
+        fb.textContent = "⚠️ Informe os dados de acesso.";
+        fb.className = "msg err"; fb.style.display = "block";
         return;
     }
 
-    monthData.forEach((item) => {
-      somaTotal += item.value;
-      if (item.paid) somaPago += item.value;
-      else somaPendente += item.value;
-
-      const dia = item.date.split('-')[2];
-      const estaVencida = item.date < hoje && !item.paid;
-      const statusClass = item.paid ? 'status-paga' : (estaVencida ? 'status-vencida' : '');
-      
-      const div = document.createElement('div');
-      div.className = `item ${statusClass}`;
-      
-      div.innerHTML = `
-        <div>
-          <div class="name">${item.desc} ${item.totalParc > 1 ? `<span class="parcela-tag">${item.nParc}/${item.totalParc}</span>` : ''} ${estaVencida ? '⚠️' : ''}</div>
-          <div class="meta">Dia ${dia} • <strong>R$ ${formatarMoeda(item.value)}</strong></div>
-        </div>
-        <div class="actions-group">
-          <button class="btn-action" title="Marcar Pago" onclick="toggleStatus('${item.docId}','${item.id}')">${item.paid ? '↩️' : '✅'}</button>
-          <button class="btn-action" title="Editar" onclick="abrirEditar('${item.docId}','${item.id}','${item.desc}',${item.value})">✏️</button>
-          <button class="btn-action" title="Excluir" onclick="excluir('${item.docId}')">🗑️</button>
-        </div>`;
-      box.appendChild(div);
-    });
-
-    atualizarResumo(somaTotal, somaPendente, somaPago);
-  }
-
-  function recalcularResumoSemReRender() {
-    const monthData = allData.filter(i => i.date && i.date.startsWith(selectedMonth));
-    let somaTotal = 0, somaPendente = 0, somaPago = 0;
-    monthData.forEach(item => {
-      somaTotal += item.value;
-      if (item.paid) somaPago += item.value;
-      else somaPendente += item.value;
-    });
-    atualizarResumo(somaTotal, somaPendente, somaPago);
-  }
-
-  function atualizarResumo(total, pendente, pago) {
-    const sobra = salarioAtual - total;
-    document.getElementById('total-mes').textContent = `R$ ${formatarMoeda(total)}`;
-    document.getElementById('total-pendente').textContent = `R$ ${formatarMoeda(pendente)}`;
-    document.getElementById('total-pago').textContent = `R$ ${formatarMoeda(pago)}`;
-    
-    const elemSobra = document.getElementById('total-sobra');
-    elemSobra.textContent = `R$ ${formatarMoeda(sobra)}`;
-    elemSobra.style.color = sobra < 0 ? 'var(--vencida)' : 'var(--primary)';
-
-    const barra = document.getElementById('barra-progresso');
-    const txtPorcentagem = document.getElementById('porcentagem-uso');
-
-    if (salarioAtual > 0) {
-      const porcentagemReal = Math.round((total / salarioAtual) * 100);
-      const porcentagemBarra = Math.min(porcentagemReal, 100);
-      
-      txtPorcentagem.textContent = `${porcentagemReal}%`;
-      barra.style.width = `${porcentagemBarra}%`;
-
-      if (porcentagemReal > 100) {
-        barra.style.backgroundColor = 'var(--vencida)';
-      } else if (porcentagemReal > 80) {
-        barra.style.backgroundColor = '#f59e0b';
-      } else {
-        barra.style.backgroundColor = 'var(--paga)';
-      }
-    } else {
-      txtPorcentagem.textContent = '0%';
-      barra.style.width = '0%';
-    }
-  }
-
-  window.toggleStatus = async (docId, pId) => {
-    const ref = doc(db, "despesas", docId), snap = await getDoc(ref);
-    if (snap.exists()) {
-      const novasParcelas = snap.data().parcelas.map(p => p.id === pId ? { ...p, paid: !p.paid } : p);
-      await updateDoc(ref, { parcelas: novasParcelas });
-    }
-  };
-
-  window.abrirEditar = (docId, pId, desc, valor) => {
-    document.getElementById('edit-doc-id').value = docId;
-    document.getElementById('edit-parcela-id').value = pId;
-    document.getElementById('edit-desc').value = desc;
-    document.getElementById('edit-valor').value = valor;
-    document.getElementById('edit-modal').classList.add('active');
-  };
-
-  window.fecharModal = () => {
-    document.getElementById('edit-modal').classList.remove('active');
-  };
-
-  document.getElementById('form-edit').onsubmit = async (e) => {
-    e.preventDefault();
-    const docId = document.getElementById('edit-doc-id').value;
-    const pId = document.getElementById('edit-parcela-id').value;
-    const desc = document.getElementById('edit-desc').value;
-    const valor = parseFloat(document.getElementById('edit-valor').value);
-
-    const ref = doc(db, "despesas", docId);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      const parcelasAtualizadas = snap.data().parcelas.map(p => p.id === pId ? { ...p, value: valor } : p);
-      await updateDoc(ref, { desc, parcelas: parcelasAtualizadas });
-    }
-    fecharModal();
-  };
-
-  window.excluir = async (id) => { 
-    if(confirm('Apagar esta conta e todas as suas parcelas?')) {
-      await deleteDoc(doc(db, "despesas", id));
-    }
-  };
-
-  document.getElementById('form').onsubmit = async e => {
-    e.preventDefault();
-    const btn = document.getElementById('btn-submit');
-    const originalText = btn.textContent;
-    btn.textContent = "Salvando...";
-    btn.classList.add('btn-loading');
-
-    const desc = document.getElementById('desc').value;
-    const valor = parseFloat(document.getElementById('valor').value);
-    const qtd = parseInt(document.getElementById('qtd').value) || 1;
-    const inputDateVal = document.getElementById('data').value;
-    
-    if(!inputDateVal) {
-      alert("Selecione uma data válida.");
-      btn.textContent = originalText;
-      btn.classList.remove('btn-loading');
-      return;
-    }
-
-    const [y, m, d] = inputDateVal.split('-').map(Number);
-    const parcelas = [];
-    
-    for(let i = 0; i < qtd; i++) {
-      const targetMonthIndex = (m - 1) + i;
-      const targetYear = y + Math.floor(targetMonthIndex / 12);
-      const targetMonth = targetMonthIndex % 12;
-      
-      const lastDayOfTargetMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
-      const actualDay = Math.min(d, lastDayOfTargetMonth);
-      
-      const dt = new Date(targetYear, targetMonth, actualDay);
-      const strDate = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
-      
-      parcelas.push({ id: Math.random().toString(36).slice(2,9), value: valor, date: strDate, paid: false });
-    }
+    btn.disabled = true; btn.textContent = "Processando..."; fb.style.display = "none";
 
     try {
-      await addDoc(collection(db, "despesas"), { desc, parcelas, userId: uid });
-      e.target.reset();
-      document.getElementById('qtd').value = "1";
-    } catch (err) {
-      alert("Erro ao salvar!");
+      let userRes;
+      try {
+        userRes = await signInWithEmailAndPassword(auth, email, senha);
+      } catch (err) {
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+          userRes = await createUserWithEmailAndPassword(auth, email, senha);
+          await setDoc(doc(db, "usuarios", userRes.user.uid), { email, aprovado: false });
+        } else { throw err; }
+      }
+
+      const userDoc = await getDoc(doc(db, "usuarios", userRes.user.uid));
+      
+      if (userDoc.exists() && userDoc.data().aprovado === true) {
+        // Redirecionamento corrigido para index.html
+        window.location.href = "index.html"; 
+      } else {
+        fb.textContent = "✅ Conta pronta! Agora realize o pagamento para liberar.";
+        fb.className = "msg success"; fb.style.display = "block";
+        switchTab('pagamento');
+        await signOut(auth);
+      }
+    } catch (e) {
+      fb.textContent = "❌ Verifique seus dados ou tente novamente.";
+      fb.className = "msg err"; fb.style.display = "block";
     } finally {
-      btn.textContent = originalText;
-      btn.classList.remove('btn-loading');
+      btn.disabled = false; btn.textContent = "Acessar Sistema";
     }
   };
+  
 
-  document.getElementById('prev').onclick = () => changeMonth(-1);
-  document.getElementById('next').onclick = () => changeMonth(1);
-  
-  function changeMonth(dir) {
-    const [y, m] = selectedMonth.split('-').map(Number);
-    const dt = new Date(y, m - 1 + dir, 1);
-    selectedMonth = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
-    loadSalario();
-  }
-  
-  document.getElementById('sair').onclick = () => confirm('Deseja sair?') && signOut(auth);
+  // INTERFACE E PIX
+  const PIX_STRING = "00020126360014BR.GOV.BCB.PIX0114+551999679685152040000530398654045.005802BR5901N6001C62070503***63049D51";
+
+  window.switchTab = (tab) => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(`section-${tab}`).classList.add('active');
+    document.getElementById(`btn-tab-${tab}`).classList.add('active');
+    document.getElementById('feedback').style.display = "none";
+  };
+
+  window.gerarPix = () => {
+    const qrCont = document.getElementById('qrcode');
+    qrCont.style.display = "block"; qrCont.innerHTML = "";
+    new QRCode(qrCont, { text: PIX_STRING, width: 170, height: 170 });
+    document.getElementById('pix-text').textContent = PIX_STRING;
+    document.getElementById('pix-area-container').style.display = "block";
+  };
+
+  window.copiarPix = () => {
+    navigator.clipboard.writeText(PIX_STRING);
+    alert("Código Pix Copiado!");
+  };
+
+  window.validarZap = () => {
+    const nome = document.getElementById('nome-usuario').value;
+    document.getElementById('btn-whatsapp').style.display = nome.trim().length >= 3 ? 'flex' : 'none';
+  };
+
+  window.enviarZap = () => {
+    const nome = document.getElementById('nome-usuario').value;
+    const msg = encodeURIComponent(`Olá! Fiz o pagamento de R$ 5,00. Nome: ${nome}. Aguardo liberação.`);
+    window.open(`https://wa.me/5519996796851?text=${msg}`, '_blank');
+  };
 </script>
 </body>
 </html>
